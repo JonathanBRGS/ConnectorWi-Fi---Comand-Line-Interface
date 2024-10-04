@@ -8,17 +8,16 @@ class Program
     static bool passwordCorrect = false;
     static void Main()
     {
-        //string ssid = "JNTHN_BRGS"; // Substitua pelo nome da sua rede Wi-Fi
-        // Solicitar ao usuário a SSID e a senha
+        // Solicitar ao usuário a SSID da rede Wi-Fi:
+
         Console.Write("Digite o nome da rede Wi-Fi (SSID): ");
         string ssid = Console.ReadLine();
 
-        //string password = "20126520";
-        
-        ////
-
         char[] characters = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z', '/', '=', '*', '!', '@', '#', '_', '-', '%', '&', '(', ')', '+', }; // Você pode adicionar mais caracteres aqui
-        int maxLength = 12; // Defina o comprimento máximo das combinações
+        
+        // Define o comprimento máximo das combinações:
+        
+        int maxLength = 12;
 
         for (int length = 1; length <= maxLength && !passwordCorrect; length++)
         {
@@ -32,15 +31,17 @@ class Program
                 // Conectar-se à rede Wi-Fi:
 
                 ConnectToWiFi(ssid);
+
                 Console.WriteLine(combination);
-                // Verifique se a senha está correta (substitua pelo seu método de verificação)
+
+                // Verifica se a senha está correta:
+
                 if (passwordCorrect)
                 {
-                    break; // Saia do loop se a senha estiver correta
+                    break;
                 }
             }
         }
-        ////
         Console.ReadKey();
     }
 
@@ -48,7 +49,8 @@ class Program
     {
         string profileFilePath = "wifi_profile.xml";
 
-        // Criar o arquivo XML com as credenciais
+        // Criar o arquivo XML com as credenciais:
+
         System.IO.File.WriteAllText(profileFilePath,
             $"<?xml version=\"1.0\"?>\n" +
             $"<WLANProfile xmlns=\"http://www.microsoft.com/networking/WLAN/profile/v1\">\n" +
@@ -67,13 +69,15 @@ class Program
             $"  </security>\n" +
             $"</WLANProfile>");
 
-        // Executar o comando para adicionar o perfil
+        // Executar o comando para adicionar o perfil:
+
         ExecuteCommand($"netsh wlan add profile filename=\"{profileFilePath}\"");
     }
 
     static void ConnectToWiFi(string ssid)
     {
-        // Executar o comando para se conectar à rede
+        // Executar o comando para se conectar à rede:
+
         ExecuteCommand($"netsh wlan connect name=\"{ssid}\"");
     }
 
@@ -86,7 +90,7 @@ class Program
                 FileName = "cmd.exe",
                 Arguments = "/C " + command,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true, // Redirecionar a saída de erro
+                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
@@ -94,7 +98,8 @@ class Program
 
         process.Start();
 
-        // Ler a saída e a saída de erro
+        // Ler a saída e a saída de erro:
+
         string output = process.StandardOutput.ReadToEnd();
         string error = process.StandardError.ReadToEnd();
         process.WaitForExit();
@@ -102,7 +107,6 @@ class Program
         if (process.ExitCode == 0)
         {
             Console.WriteLine($"Comando executado com sucesso: {command}");
-            //passwordCorrect = true;
         }
         else
         {
@@ -115,16 +119,19 @@ class Program
     {
         if (length == 0)
         {
-            yield return prefix; // Retorna a combinação completa
+            yield return prefix;
         }
         else
         {
             foreach (char c in characters)
             {
-                // Chama recursivamente, reduzindo o comprimento
+                // Executa a recurssão:
+
                 foreach (var combination in GenerateCombinations(characters, prefix + c, length - 1))
                 {
-                    yield return combination; // Retorna cada combinação gerada
+                    // Retorna a combinação gerada:
+                    
+                    yield return combination;
                 }
             }
         }

